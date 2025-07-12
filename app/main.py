@@ -18,22 +18,24 @@ def fetch_telekom_usage():
         response = requests.get(API_URL, timeout=5)
         response.raise_for_status()
         content_type = response.headers.get("Content-Type", "")
-        print(f"Content-Type: {content_type}")
-        print(f"Raw response:\n{response.text}\n")
+        # TODO DEBUG option
+        #print(f"Content-Type: {content_type}")
+        #print(f"Raw response:\n{response.text}\n")
 
         if "application/json" not in content_type:
             print("Not a JSON response — are you on T-Mobile mobile data?")
             return
 
         data = response.json()
-        print(f"Parsed JSON:\n{json.dumps(data, indent=2)}\n")
+        # TODO DEBUG option
+        #print(f"Parsed JSON:\n{json.dumps(data, indent=2)}\n")
 
         if "usedVolume" in data:
             used = float(data["usedVolume"])
             total = float(data["initialVolume"])
             remaining = total - used
-            bytes_used.set(print(f"{used:.1f}"))
-            bytes_remaining.set(print(f"{remaining:.1f}"))
+            bytes_used.set(used)
+            bytes_remaining.set(remaining)
             days_remaining.set(data["remainingSeconds"] / (60 * 60 * 24))  # convert to days
         else:
             print("Unexpected data format from Telekom")
