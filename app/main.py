@@ -29,8 +29,11 @@ def fetch_telekom_usage():
         print(f"Parsed JSON:\n{json.dumps(data, indent=2)}\n")
 
         if "usedVolume" in data:
-            bytes_used.set(print(f"{data["usedVolume"]:.1f}"))
-            bytes_remaining.set(print(f"{(data["initialVolume"] - data["usedVolume"]):.1f}"))
+            used = float(data["usedVolume"])
+            total = float(data["initialVolume"])
+            remaining = total - used
+            bytes_used.set(print(f"{used:.1f}"))
+            bytes_remaining.set(print(f"{remaining:.1f}"))
             days_remaining.set(data["remainingSeconds"] / (60 * 60 * 24))  # convert to days
         else:
             print("Unexpected data format from Telekom")
