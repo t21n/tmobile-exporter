@@ -85,7 +85,7 @@ jobs:
           image: ${{ steps.build-image.outputs.image }}
           tags: 'next ${{env.APP_VERSION}}_rc'
           registry: registry.hub.docker.com
-          username: ${{ secrets.DOCKER_HUB_USER}}
+          username: ${{ vars.DOCKER_HUB_USER}}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
         if: github.ref == 'refs/heads/develop'
 
