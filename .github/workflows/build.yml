@@ -8,6 +8,9 @@ on:
       - develop
     tags:
       - '*'
+env:
+  DOCKER_IMAGE_NAME: tools4homeautomation/tmobile-exporter
+
 jobs:
   Build:
     name: Build and Test on ${{ matrix.python }} and ${{ matrix.os }}
@@ -92,8 +95,8 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
-            next
-            ${{env.APP_VERSION}}_rc
+            ${{env.DOCKER_IMAGE_NAME}}:next
+            ${{env.DOCKER_IMAGE_NAME}}:${{env.APP_VERSION}}_rc
           build-args: |
             BUILD_DATE=${{env.BUILD_DATE}}
             APP_VERSION=${{env.APP_VERSION}}
@@ -108,8 +111,8 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
-            latest
-            ${{env.BRANCH}}
+            ${{env.DOCKER_IMAGE_NAME}}:latest
+            ${{env.DOCKER_IMAGE_NAME}}:${{env.BRANCH}}
           build-args: |
             BUILD_DATE=${{env.BUILD_DATE}}
             APP_VERSION=${{env.BRANCH}}
