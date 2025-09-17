@@ -57,9 +57,11 @@ jobs:
           BRANCH=${GITHUB_REF_NAME#v}
           APP_VERSION=$(cat config.json | grep version| head -1 | awk -F: '{ print $2 }' | sed 's/[",]//g' | sed 's/ //g')
           echo Version: $APP_VERSION
-          echo -n "VERSION=$APP_VERSION" >> $GITHUB_ENV
-          echo -n "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
-          echo -n "BUILD_DATE=$BUILD_DATE" >> $GITHUB_ENV
+          /bin/cat <<EOM >>$GITHUB_ENV
+          VERSION=$APP_VERSION
+          APP_VERSION=$APP_VERSION
+          BUILD_DATE=$BUILD_DATE
+          EOM
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
