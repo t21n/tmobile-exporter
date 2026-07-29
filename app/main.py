@@ -1,4 +1,4 @@
-import json
+import re
 import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
@@ -11,34 +11,74 @@ bytes_used = Gauge('telekom_mobile_data_bytes_used', 'Mobile data used (in bytes
 bytes_remaining = Gauge('telekom_mobile_data_bytes_remaining', 'Mobile data remaining (in bytes)', registry=registry)
 days_remaining = Gauge('telekom_mobile_days_remaining', 'Days remaining in current billing cycle', registry=registry)
 
-API_URL = "http://pass.telekom.de/api/service/generic/v1/status"
+# Telekom retired the JSON API in favor of a server-rendered usage page.
+# The figures we need are embedded in the HTML of this page instead.
+API_URL = "https://pass.telekom.de/home"
+
+UNIT_MULTIPLIERS = {"KB": 1000, "MB": 1000 ** 2, "GB": 1000 ** 3, "TB": 1000 ** 4}
+
+# The "summationPass" block holds the total remaining/initial volume across
+# all data passes; the days/hours/mins/secs spans hold time left in the cycle.
+VOLUME_PATTERN = re.compile(
+    r'id="summationPass".*?'
+    r'remaining-volume-value">\s*([\d.,]+)\s*<.*?'
+    r'start-volume">\s*([\d.,]+)\s*<.*?'
+    r'volume-unit">\s*(\w+)\s*<',
+    re.DOTALL,
+)
+COUNTDOWN_PATTERN = re.compile(
+    r'class="days">(\d+)</span>.*?'
+    r'class="hours">(\d+)</span>.*?'
+    r'class="mins">(\d+)</span>.*?'
+    r'class="secs">(\d+)</span>',
+    re.DOTALL,
+)
+
+
+def _parse_german_number(value):
+    return float(value.strip().replace(".", "").replace(",", "."))
+
+
+def parse_usage(html):
+    """Extract usage figures from the pass.telekom.de "/home" page.
+
+    Returns a dict with used/remaining bytes and remaining seconds in the
+    current cycle, or None if the expected markup wasn't found.
+    """
+    volume_match = VOLUME_PATTERN.search(html)
+    countdown_match = COUNTDOWN_PATTERN.search(html)
+    if not volume_match or not countdown_match:
+        return None
+
+    remaining_str, total_str, unit = volume_match.groups()
+    multiplier = UNIT_MULTIPLIERS.get(unit.upper())
+    if multiplier is None:
+        return None
+
+    remaining = _parse_german_number(remaining_str) * multiplier
+    total = _parse_german_number(total_str) * multiplier
+    days, hours, mins, secs = (int(value) for value in countdown_match.groups())
+
+    return {
+        "used": total - remaining,
+        "remaining": remaining,
+        "remaining_seconds": days * 86400 + hours * 3600 + mins * 60 + secs,
+    }
+
 
 def fetch_telekom_usage():
     try:
         response = requests.get(API_URL, timeout=5)
         response.raise_for_status()
-        content_type = response.headers.get("Content-Type", "")
-        # TODO DEBUG option
-        #print(f"Content-Type: {content_type}")
-        #print(f"Raw response:\n{response.text}\n")
 
-        if "application/json" not in content_type:
-            print("Not a JSON response — are you on T-Mobile mobile data?")
+        usage = parse_usage(response.text)
+        if usage is None:
+            print("Unexpected data format from Telekom — are you on T-Mobile mobile data?")
             return
 
-        data = response.json()
-        # TODO DEBUG option
-        #print(f"Parsed JSON:\n{json.dumps(data, indent=2)}\n")
-
-        if "usedVolume" in data:
-            used = float(data["usedVolume"])
-            total = float(data["initialVolume"])
-            remaining = total - used
-            bytes_used.set(used)
-            bytes_remaining.set(remaining)
-            days_remaining.set(data["remainingSeconds"] / (60 * 60 * 24))  # convert to days
-        else:
-            print("Unexpected data format from Telekom")
+        bytes_used.set(usage["used"])
+        bytes_remaining.set(usage["remaining"])
+        days_remaining.set(usage["remaining_seconds"] / (60 * 60 * 24))  # convert to days
     except Exception as e:
         print(f"Error fetching Telekom usage: {e}")
 
