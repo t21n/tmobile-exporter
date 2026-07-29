@@ -1,4 +1,43 @@
 
+## [1.0.0](https://github.com/ContinuousSecurityTooling/keycloak-auditor/compare/v0.1.0...v1.0.0) (2026-07-29)
+
+### Bug Fixes
+
+* Adjust to tmobile changes ([dac4bda](https://github.com/ContinuousSecurityTooling/keycloak-auditor/commit/dac4bda1c0763a75f861d00a999932e261eec108))
+
+
+
+### Dependency Updates
+
+* **deps:** Update actions/checkout action to v6 ([8eb1d2d](https://github.com/ContinuousSecurityTooling/keycloak-auditor/commit/8eb1d2d3ac15b84f9d1bc84520f490876e99dee4))
+
+* **deps:** Update dependency python to v3.14.0 ([3c873b5](https://github.com/ContinuousSecurityTooling/keycloak-auditor/commit/3c873b5eff26b8388355f0d21f5fb518f4afd8f1))
+
+* **deps:** Update dependency node to v24 ([36d5687](https://github.com/ContinuousSecurityTooling/keycloak-auditor/commit/36d56876f657c0c1d8c3b75ebe954f8be82bcf5e))
+
+* **deps:** Update actions/setup-python action to v6 ([13181dd](https://github.com/ContinuousSecurityTooling/keycloak-auditor/commit/13181dd794ca6cdcd8101b283c967ec4c17390ba))
+
+* **deps:** Update actions/setup-node action to v6 ([8280e89](https://github.com/ContinuousSecurityTooling/keycloak-auditor/commit/8280e89a6f5b491b853d1011bec7b29bcc17b0ec))
+
+* **deps:** Update actions/create-github-app-token action to v2 ([8acd331](https://github.com/ContinuousSecurityTooling/keycloak-auditor/commit/8acd331c89e757c8091eea5897ff342a1bc039f0))
+
+* **deps:** Update docker/setup-buildx-action action to v4 ([c86912d](https://github.com/ContinuousSecurityTooling/keycloak-auditor/commit/c86912dda0af2b96ab61b93861f2237e588a2f0e))
+
+* **deps:** Update docker/login-action action to v4 ([e1e59ad](https://github.com/ContinuousSecurityTooling/keycloak-auditor/commit/e1e59ad239d1c372253f4ceb7d4023d8e8f40067))
+
+* **deps:** Update python docker tag to v3.14.6 ([bb6361d](https://github.com/ContinuousSecurityTooling/keycloak-auditor/commit/bb6361de21e136f4caaae5f97139c42827a1bdc3))
+
+* **deps:** Update docker/build-push-action action to v7 ([421d5ee](https://github.com/ContinuousSecurityTooling/keycloak-auditor/commit/421d5ee6362cfa5719ed918dd29dda54b85a4740))
+
+
+
+### Features
+
+* **Testing:** Adding end2end tests ([cc5055a](https://github.com/ContinuousSecurityTooling/keycloak-auditor/commit/cc5055ab57c073049e386b34e44b5316c9b010ee))
+
+
+
+
 # [0.1.0](https://github.com/t21n/tmobile-exporter/compare/51a850ad23b62ef8646b1786007360b07bbe33b0...v0.1.0) (2025-07-14)
 
 
