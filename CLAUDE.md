@@ -27,6 +27,18 @@ stable, unique elements observed in the rendered page:
   time remaining in the current billing cycle (there was previously a
   single `remainingSeconds` field for this).
 
+**The `days` span is conditionally omitted** once less than 24h remain in
+the cycle — Telekom renders `18 Std. 25 Min. 07 Sek.` with no days markup
+at all, rather than `0 Tage`. `parse_usage()` isolates the `<span
+class="countdown">...</span>` block first (via `COUNTDOWN_BLOCK_PATTERN`)
+and then looks up each unit independently within that block, defaulting
+missing ones to `0` — this also avoids false hits from other unrelated
+`class="days"` elements further down the page (e.g. purchasable data-pass
+offer validity, "gültig für 31 Tage"). If a similar "hours"/"mins"/"secs"
+omission ever shows up, extend the same per-unit lookup rather than
+requiring all four in one sequential regex — that's what broke this the
+first time (2026-07-31).
+
 If Telekom changes the markup again, re-derive these anchors by fetching
 `/home` from a device on the T-Mobile mobile network and grepping for
 `volume-value` / `volume-bar` / `daysText` class names — that's how the
@@ -44,11 +56,12 @@ cannot be reached over WiFi or through a VPN/proxy — see
 
 ## Test structure
 
-- **`test/test_unit.py`** — mocks `requests.get`, feeds parsing logic a
-  static HTML fixture (`test/fixtures/pass_telekom_home.html`) with
-  synthetic (not real subscriber) numbers. Runs anywhere, no network
-  needed. Covers `parse_usage()` directly plus `fetch_telekom_usage()`
-  error paths (HTTP errors, unexpected markup).
+- **`test/test_unit.py`** — mocks `requests.get`, feeds parsing logic static
+  HTML fixtures under `test/fixtures/` with synthetic (not real subscriber)
+  numbers. Runs anywhere, no network needed. Covers `parse_usage()` directly
+  (including the no-`days`-span case, `pass_telekom_home_no_days.html`)
+  plus `fetch_telekom_usage()` error paths (HTTP errors, unexpected
+  markup).
 - **`test/test_e2e.py`** — the original real-network test; calls the live
   Telekom endpoint and asserts a gauge value `> 0`. Only meaningful when
   run from a host actually on T-Mobile mobile data.

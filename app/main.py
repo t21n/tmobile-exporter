@@ -18,7 +18,7 @@ API_URL = "https://pass.telekom.de/home"
 UNIT_MULTIPLIERS = {"KB": 1000, "MB": 1000 ** 2, "GB": 1000 ** 3, "TB": 1000 ** 4}
 
 # The "summationPass" block holds the total remaining/initial volume across
-# all data passes; the days/hours/mins/secs spans hold time left in the cycle.
+# all data passes; the countdown span holds time left in the cycle.
 VOLUME_PATTERN = re.compile(
     r'id="summationPass".*?'
     r'remaining-volume-value">\s*([\d.,]+)\s*<.*?'
@@ -26,13 +26,17 @@ VOLUME_PATTERN = re.compile(
     r'volume-unit">\s*(\w+)\s*<',
     re.DOTALL,
 )
-COUNTDOWN_PATTERN = re.compile(
-    r'class="days">(\d+)</span>.*?'
-    r'class="hours">(\d+)</span>.*?'
-    r'class="mins">(\d+)</span>.*?'
-    r'class="secs">(\d+)</span>',
-    re.DOTALL,
-)
+# Isolate the countdown span first: "days" is a class name used elsewhere on
+# the page too (e.g. data pass offer validity), so matching it globally would
+# risk picking up an unrelated number. Within the isolated block, "days" is
+# itself optional — Telekom omits it once under 24h remain in the cycle.
+COUNTDOWN_BLOCK_PATTERN = re.compile(r'class="countdown">(.*?)</div>', re.DOTALL)
+COUNTDOWN_UNIT_PATTERNS = {
+    "days": re.compile(r'class="days">(\d+)</span>'),
+    "hours": re.compile(r'class="hours">(\d+)</span>'),
+    "mins": re.compile(r'class="mins">(\d+)</span>'),
+    "secs": re.compile(r'class="secs">(\d+)</span>'),
+}
 
 
 def _parse_german_number(value):
@@ -46,8 +50,8 @@ def parse_usage(html):
     current cycle, or None if the expected markup wasn't found.
     """
     volume_match = VOLUME_PATTERN.search(html)
-    countdown_match = COUNTDOWN_PATTERN.search(html)
-    if not volume_match or not countdown_match:
+    countdown_block_match = COUNTDOWN_BLOCK_PATTERN.search(html)
+    if not volume_match or not countdown_block_match:
         return None
 
     remaining_str, total_str, unit = volume_match.groups()
@@ -57,7 +61,13 @@ def parse_usage(html):
 
     remaining = _parse_german_number(remaining_str) * multiplier
     total = _parse_german_number(total_str) * multiplier
-    days, hours, mins, secs = (int(value) for value in countdown_match.groups())
+
+    countdown_block = countdown_block_match.group(1)
+    countdown_matches = {name: pattern.search(countdown_block) for name, pattern in COUNTDOWN_UNIT_PATTERNS.items()}
+    if not any(countdown_matches.values()):
+        return None
+    units = {name: int(match.group(1)) if match else 0 for name, match in countdown_matches.items()}
+    days, hours, mins, secs = units["days"], units["hours"], units["mins"], units["secs"]
 
     return {
         "used": total - remaining,

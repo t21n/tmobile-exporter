@@ -5,6 +5,7 @@ import requests
 from app import main
 
 FIXTURE_HTML = (Path(__file__).parent / "fixtures" / "pass_telekom_home.html").read_text()
+FIXTURE_HTML_NO_DAYS = (Path(__file__).parent / "fixtures" / "pass_telekom_home_no_days.html").read_text()
 
 EXPECTED_REMAINING = 12.34 * 1000 ** 3
 EXPECTED_TOTAL = 50 * 1000 ** 3
@@ -18,6 +19,16 @@ def test_parse_usage_extracts_volume_and_countdown():
     assert usage["remaining"] == EXPECTED_REMAINING
     assert usage["used"] == EXPECTED_TOTAL - EXPECTED_REMAINING
     assert usage["remaining_seconds"] == EXPECTED_SECONDS
+
+
+def test_parse_usage_handles_missing_days_span():
+    # Telekom omits the "days" span (rather than rendering "0 Tage") once
+    # less than 24h remain in the billing cycle.
+    usage = main.parse_usage(FIXTURE_HTML_NO_DAYS)
+
+    assert usage is not None
+    assert usage["remaining"] == 3.50 * 1000 ** 3
+    assert usage["remaining_seconds"] == 18 * 3600 + 25 * 60 + 7
 
 
 def test_parse_usage_returns_none_for_unexpected_markup():

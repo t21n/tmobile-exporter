@@ -1,0 +1,32 @@
+<!--
+  Same as pass_telekom_home.html, but reproducing the case where less than
+  24h remain in the billing cycle: Telekom omits the "days" span entirely
+  instead of rendering "0 Tage". All figures are synthetic.
+-->
+<!DOCTYPE html>
+<html lang="de">
+<head><title>Datennutzung</title></head>
+<body class="mainContent">
+    <div class="data-pass-instance" id="summationPass">
+        <div class="volume fit-text-to-container">
+            <div class="remaining-volume">
+                <div class="remaining-volume-value">3,50
+                </div>
+                <div class="volume-delimiter">/</div>
+            </div>
+            <div class="start-volume">50</div>
+            <div class="volume-unit">GB</div>
+        </div>
+        <div class="volume-bar-container">
+            <span class="volume-bar " style="--to-width:93%;"></span>
+        </div>
+    </div>
+    <div class="data-pass-instance" id="pass-example0001">
+        <div class="data-pass-instance__headline">
+            <h2>Inklusivvolumen (Inland und EU)</h2>
+        </div>
+        <div class="remaining-duration fit-text-to-container ">verbleibend für <span class="countdown"><span class="hoursText"><span class="hours">18</span> Std. </span><span class="minutesText"><span class="mins">25</span> Min. </span><span style="display: none;" class="secondsText"><span class="secs">7</span> Sek.</span></span>
+        </div>
+    </div>
+</body>
+</html>
