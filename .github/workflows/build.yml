@@ -115,10 +115,10 @@ jobs:
           push: true
           tags: |
             ${{env.DOCKER_IMAGE_NAME}}:latest
-            ${{env.DOCKER_IMAGE_NAME}}:${{env.BRANCH}}
+            ${{env.DOCKER_IMAGE_NAME}}:${{env.APP_VERSION}}
           build-args: |
             BUILD_DATE=${{env.BUILD_DATE}}
-            APP_VERSION=${{env.BRANCH}}
+            APP_VERSION=${{env.APP_VERSION}}
           platforms: linux/amd64,linux/arm64,linux/arm/v7
         if: github.ref_type == 'tag' || github.tag != ''
 
