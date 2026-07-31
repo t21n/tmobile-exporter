@@ -1,4 +1,13 @@
 
+## [1.0.1](https://github.com/ContinuousSecurityTooling/keycloak-auditor/compare/v1.0.0...v1.0.1) (2026-07-31)
+
+### Bug Fixes
+
+* **API:** Make days parsing optional ([f2897b7](https://github.com/ContinuousSecurityTooling/keycloak-auditor/commit/f2897b7d9b2b5599d30d66b261e7a74b6a1c4dd3))
+
+
+
+
 ## [1.0.0](https://github.com/ContinuousSecurityTooling/keycloak-auditor/compare/v0.1.0...v1.0.0) (2026-07-29)
 
 ### Bug Fixes
