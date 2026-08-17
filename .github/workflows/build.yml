@@ -21,7 +21,7 @@ jobs:
         python: ['pypy3.9', 'pypy3.10', '3.9', '3.10', '3.11', '3.12']
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Set up Python ${{ matrix.python }}
         uses: actions/setup-python@v6
         with:
@@ -52,7 +52,7 @@ jobs:
     name: Build Container Image
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Write version vars
         id: version-vars
@@ -126,7 +126,7 @@ jobs:
     name: End2End Testing
     runs-on: end2end
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Set up Python 3.12
         uses: actions/setup-python@v6
         with:
