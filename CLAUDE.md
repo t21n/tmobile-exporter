@@ -44,6 +44,22 @@ If Telekom changes the markup again, re-derive these anchors by fetching
 `volume-value` / `volume-bar` / `daysText` class names — that's how the
 current anchors were found (no public docs exist for this).
 
+**When an unlimited data pass is active, the `summationPass` block has no
+numbers at all.** Instead of the remaining/start/unit breakdown it renders
+a plain `<span class="volume">unbegrenzt</span>`, and the entire countdown
+disappears from the page too — no `Tage`/`Std.`/`Min.`/`Sek.` markup
+anywhere (confirmed 2026-08-28: the account's "Inklusivvolumen" pass had
+switched to `unbegrenzt` with "Download-Speed: bis zu Max", and the page
+had zero occurrences of `remaining-volume-value`, `start-volume`,
+`volume-unit`, or `countdown`). This is a real account state, not a broken
+page — `test/test_e2e.py` failing with "Unexpected data format" while the
+page loads fine (HTTP 200) is the signal to check for this rather than
+assume the markup changed again. `parse_usage()` handles it via a second
+`UNLIMITED_PATTERN` checked after the numeric `VOLUME_PATTERN` fails to
+match: `used`/`remaining_seconds` are reported as `0`, `remaining` as
+`float('inf')` (chosen over adding a separate "unlimited" gauge or
+reporting `0` remaining, which would look like the plan was exhausted).
+
 ## Why it only works on T-Mobile's mobile network
 
 There's no visible auth token, cookie, or login on `/home` — it renders
@@ -59,9 +75,9 @@ cannot be reached over WiFi or through a VPN/proxy — see
 - **`test/test_unit.py`** — mocks `requests.get`, feeds parsing logic static
   HTML fixtures under `test/fixtures/` with synthetic (not real subscriber)
   numbers. Runs anywhere, no network needed. Covers `parse_usage()` directly
-  (including the no-`days`-span case, `pass_telekom_home_no_days.html`)
-  plus `fetch_telekom_usage()` error paths (HTTP errors, unexpected
-  markup).
+  (including the no-`days`-span case, `pass_telekom_home_no_days.html`, and
+  the unlimited-pass case, `pass_telekom_home_unlimited.html`) plus
+  `fetch_telekom_usage()` error paths (HTTP errors, unexpected markup).
 - **`test/test_e2e.py`** — the original real-network test; calls the live
   Telekom endpoint and asserts a gauge value `> 0`. Only meaningful when
   run from a host actually on T-Mobile mobile data.

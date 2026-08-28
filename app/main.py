@@ -26,6 +26,10 @@ VOLUME_PATTERN = re.compile(
     r'volume-unit">\s*(\w+)\s*<',
     re.DOTALL,
 )
+# When an unlimited data pass is active, Telekom replaces the numeric
+# breakdown above with a plain "unbegrenzt" label and renders no countdown
+# at all (there's nothing to count down to) — see CLAUDE.md.
+UNLIMITED_PATTERN = re.compile(r'id="summationPass".*?<span class="volume">\s*unbegrenzt\s*</span>', re.DOTALL)
 # Isolate the countdown span first: "days" is a class name used elsewhere on
 # the page too (e.g. data pass offer validity), so matching it globally would
 # risk picking up an unrelated number. Within the isolated block, "days" is
@@ -43,37 +47,51 @@ def _parse_german_number(value):
     return float(value.strip().replace(".", "").replace(",", "."))
 
 
-def parse_usage(html):
-    """Extract usage figures from the pass.telekom.de "/home" page.
-
-    Returns a dict with used/remaining bytes and remaining seconds in the
-    current cycle, or None if the expected markup wasn't found.
-    """
-    volume_match = VOLUME_PATTERN.search(html)
+def _extract_remaining_seconds(html):
+    """Read the days/hours/mins/secs countdown, or None if it's missing."""
     countdown_block_match = COUNTDOWN_BLOCK_PATTERN.search(html)
-    if not volume_match or not countdown_block_match:
+    if not countdown_block_match:
         return None
-
-    remaining_str, total_str, unit = volume_match.groups()
-    multiplier = UNIT_MULTIPLIERS.get(unit.upper())
-    if multiplier is None:
-        return None
-
-    remaining = _parse_german_number(remaining_str) * multiplier
-    total = _parse_german_number(total_str) * multiplier
 
     countdown_block = countdown_block_match.group(1)
     countdown_matches = {name: pattern.search(countdown_block) for name, pattern in COUNTDOWN_UNIT_PATTERNS.items()}
     if not any(countdown_matches.values()):
         return None
     units = {name: int(match.group(1)) if match else 0 for name, match in countdown_matches.items()}
-    days, hours, mins, secs = units["days"], units["hours"], units["mins"], units["secs"]
+    return units["days"] * 86400 + units["hours"] * 3600 + units["mins"] * 60 + units["secs"]
 
-    return {
-        "used": total - remaining,
-        "remaining": remaining,
-        "remaining_seconds": days * 86400 + hours * 3600 + mins * 60 + secs,
-    }
+
+def parse_usage(html):
+    """Extract usage figures from the pass.telekom.de "/home" page.
+
+    Returns a dict with used/remaining bytes and remaining seconds in the
+    current cycle, or None if the expected markup wasn't found. When an
+    unlimited data pass is active, "remaining" is float('inf') and "used"/
+    "remaining_seconds" are 0 — the page gives no numbers for either.
+    """
+    volume_match = VOLUME_PATTERN.search(html)
+    if volume_match:
+        remaining_str, total_str, unit = volume_match.groups()
+        multiplier = UNIT_MULTIPLIERS.get(unit.upper())
+        if multiplier is None:
+            return None
+
+        remaining_seconds = _extract_remaining_seconds(html)
+        if remaining_seconds is None:
+            return None
+
+        remaining = _parse_german_number(remaining_str) * multiplier
+        total = _parse_german_number(total_str) * multiplier
+        return {
+            "used": total - remaining,
+            "remaining": remaining,
+            "remaining_seconds": remaining_seconds,
+        }
+
+    if UNLIMITED_PATTERN.search(html):
+        return {"used": 0.0, "remaining": float("inf"), "remaining_seconds": 0}
+
+    return None
 
 
 def fetch_telekom_usage():

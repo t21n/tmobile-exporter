@@ -1,0 +1,28 @@
+<!--
+  Reproduces the state where an unlimited data pass is active: the
+  summationPass block shows the plain text "unbegrenzt" instead of a
+  numeric remaining/total breakdown, and there is no countdown at all
+  (no days/hours/mins/secs markup anywhere on the real page).
+-->
+<!DOCTYPE html>
+<html lang="de">
+<head><title>Datennutzung</title></head>
+<body class="mainContent">
+    <section class="data-pass-instance" id="summationPass">
+        <strong><span class="volume">unbegrenzt</span>
+        </strong>
+        <div class="volume-bar-container">
+            <span class="volume-bar " style="--to-width:100%;"></span>
+        </div>
+    </section>
+    <div class="data-pass-instance" id="pass-example0001">
+        <div class="data-pass-instance__headline">
+            <h2>Inklusivvolumen (Inland)</h2>
+        </div>
+        <div class="volume fit-text-to-container">
+            <strong>unbegrenzt</strong>
+        </div>
+        <div class="info-row">Download-Speed: bis zu Max</div>
+    </div>
+</body>
+</html>
