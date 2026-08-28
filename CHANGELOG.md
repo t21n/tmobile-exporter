@@ -1,4 +1,19 @@
 
+## [1.0.2](https://github.com/ContinuousSecurityTooling/keycloak-auditor/compare/v1.0.1...v1.0.2) (2026-08-28)
+
+### Dependency Updates
+
+* **deps:** Update actions/checkout action to v7 ([84bc83b](https://github.com/ContinuousSecurityTooling/keycloak-auditor/commit/84bc83b5953ff7a579f88355ec69c5801acc8bb8))
+
+* **deps:** Update python docker tag to v3.14.7 ([5f3a7ab](https://github.com/ContinuousSecurityTooling/keycloak-auditor/commit/5f3a7ab49240d3959583cdb10d0fefd013cfecfd))
+
+* **deps:** Update actions/create-github-app-token action to v3 ([345a804](https://github.com/ContinuousSecurityTooling/keycloak-auditor/commit/345a804b7dc0aacdb9f47d7359f3944f1333e4d5))
+
+* **deps:** Update actions/setup-python action to v7 ([0a42fa6](https://github.com/ContinuousSecurityTooling/keycloak-auditor/commit/0a42fa6d0d8e2e257192e433e5afa42cbe63343c))
+
+
+
+
 ## [1.0.1](https://github.com/ContinuousSecurityTooling/keycloak-auditor/compare/v1.0.0...v1.0.1) (2026-07-31)
 
 ### Bug Fixes
