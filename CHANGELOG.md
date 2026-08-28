@@ -1,4 +1,13 @@
 
+## [1.0.3](https://github.com/ContinuousSecurityTooling/keycloak-auditor/compare/v1.0.2...v1.0.3) (2026-08-28)
+
+### Bug Fixes
+
+* Adding support for unlimited volume ([cd32eea](https://github.com/ContinuousSecurityTooling/keycloak-auditor/commit/cd32eea890948bdde8304b07b9c302afc4348197))
+
+
+
+
 ## [1.0.2](https://github.com/ContinuousSecurityTooling/keycloak-auditor/compare/v1.0.1...v1.0.2) (2026-08-28)
 
 ### Dependency Updates
