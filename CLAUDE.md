@@ -57,8 +57,19 @@ page loads fine (HTTP 200) is the signal to check for this rather than
 assume the markup changed again. `parse_usage()` handles it via a second
 `UNLIMITED_PATTERN` checked after the numeric `VOLUME_PATTERN` fails to
 match: `used`/`remaining_seconds` are reported as `0`, `remaining` as
-`float('inf')` (chosen over adding a separate "unlimited" gauge or
-reporting `0` remaining, which would look like the plan was exhausted).
+`UNLIMITED_REMAINING_BYTES` (chosen over adding a separate "unlimited"
+gauge or reporting `0` remaining, which would look like the plan was
+exhausted).
+
+**`remaining` uses `sys.float_info.max`, not `float('inf')`.** The exporter
+itself round-trips a real IEEE Infinity fine (`generate_latest()` renders
+`+Inf`, a valid Prometheus/OpenMetrics value), but confirmed 2026-08-29
+against a live Prometheus instance scraping this exporter: Prometheus
+displayed `+Inf` as the value rather than treating it as unbounded/large,
+which isn't the useful representation for graphing or alert thresholds. A
+large *finite* sentinel behaves like normal data through PromQL (no risk of
+`+Inf`-specific handling in downstream queries/dashboards), so
+`UNLIMITED_REMAINING_BYTES = sys.float_info.max` is used instead.
 
 ## Why it only works on T-Mobile's mobile network
 

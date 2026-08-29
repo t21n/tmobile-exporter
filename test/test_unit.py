@@ -37,7 +37,7 @@ def test_parse_usage_handles_unlimited_pass():
     # instead of numbers and renders no countdown at all.
     usage = main.parse_usage(FIXTURE_HTML_UNLIMITED)
 
-    assert usage == {"used": 0.0, "remaining": float("inf"), "remaining_seconds": 0}
+    assert usage == {"used": 0.0, "remaining": main.UNLIMITED_REMAINING_BYTES, "remaining_seconds": 0}
 
 
 def test_parse_usage_returns_none_for_unexpected_markup():
@@ -71,7 +71,7 @@ def test_fetch_telekom_usage_sets_gauges_for_unlimited_pass(monkeypatch):
 
     main.fetch_telekom_usage()
 
-    assert main.bytes_remaining._value.get() == float("inf")
+    assert main.bytes_remaining._value.get() == main.UNLIMITED_REMAINING_BYTES
     assert main.bytes_used._value.get() == 0.0
     assert main.days_remaining._value.get() == 0.0
 

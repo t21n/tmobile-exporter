@@ -1,4 +1,5 @@
 import re
+import sys
 import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
@@ -16,6 +17,14 @@ days_remaining = Gauge('telekom_mobile_days_remaining', 'Days remaining in curre
 API_URL = "https://pass.telekom.de/home"
 
 UNIT_MULTIPLIERS = {"KB": 1000, "MB": 1000 ** 2, "GB": 1000 ** 3, "TB": 1000 ** 4}
+
+# Sentinel for "remaining" when an unlimited data pass is active. A real
+# IEEE Infinity (float('inf')) round-trips fine through the exporter itself,
+# but Prometheus's query engine turns any arithmetic on +Inf (differences,
+# ratios, rate()) into NaN, which then commonly renders as 0 — confirmed
+# 2026-08-29 against a live Prometheus instance. A large finite value behaves
+# like normal data through PromQL instead.
+UNLIMITED_REMAINING_BYTES = sys.float_info.max
 
 # The "summationPass" block holds the total remaining/initial volume across
 # all data passes; the countdown span holds time left in the cycle.
@@ -66,8 +75,9 @@ def parse_usage(html):
 
     Returns a dict with used/remaining bytes and remaining seconds in the
     current cycle, or None if the expected markup wasn't found. When an
-    unlimited data pass is active, "remaining" is float('inf') and "used"/
-    "remaining_seconds" are 0 — the page gives no numbers for either.
+    unlimited data pass is active, "remaining" is UNLIMITED_REMAINING_BYTES
+    and "used"/"remaining_seconds" are 0 — the page gives no numbers for
+    either.
     """
     volume_match = VOLUME_PATTERN.search(html)
     if volume_match:
@@ -89,7 +99,7 @@ def parse_usage(html):
         }
 
     if UNLIMITED_PATTERN.search(html):
-        return {"used": 0.0, "remaining": float("inf"), "remaining_seconds": 0}
+        return {"used": 0.0, "remaining": UNLIMITED_REMAINING_BYTES, "remaining_seconds": 0}
 
     return None
 
