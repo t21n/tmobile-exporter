@@ -1,4 +1,13 @@
 
+## [1.0.4](https://github.com/ContinuousSecurityTooling/keycloak-auditor/compare/v1.0.3...v1.0.4) (2026-08-29)
+
+### Bug Fixes
+
+* **Metrics:** Correcting max float for unlimited traffic ([7a55559](https://github.com/ContinuousSecurityTooling/keycloak-auditor/commit/7a5555982c9f08dc669e3cff82a7e214c922329a))
+
+
+
+
 ## [1.0.3](https://github.com/ContinuousSecurityTooling/keycloak-auditor/compare/v1.0.2...v1.0.3) (2026-08-28)
 
 ### Bug Fixes
